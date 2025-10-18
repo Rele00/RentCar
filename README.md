@@ -1,4 +1,4 @@
-# Documentación y estructura — **Rent Car (Blazor + EF Core + Identity)**
+﻿# Documentación y estructura — **Rent Car (Blazor + EF Core + Identity)**
 
 Este documento describe la arquitectura y estructura actual del proyecto **Rent Car**, desarrollado con **Blazor Server**, **Entity Framework Core** (.NET 8) e integración de **ASP.NET Identity**. Incluye la estructura real de archivos, ejemplos de entidades, configuración de `DbContext`, servicios, y buenas prácticas.
 
@@ -33,45 +33,50 @@ Este documento describe la arquitectura y estructura actual del proyecto **Rent 
 -- 📁 Estructura del proyecto RentCar
 
 RentCar/
+├── Program.cs                               # Configuración principal: servicios, Identity, DbContext y registro de endpoints Blazor.
+├── appsettings.json                         # Configuración de entorno: cadena de conexión (DefaultConnection), logging, etc.
+├── Comentarios.md                           # Notas y documentación técnica adicional.
+├── README.md                                # Documentación principal del proyecto.
 │
-├── Data/                                  -- Capa de acceso a datos
+├── Data/                                    # Capa de acceso a datos (Entity Framework Core + lógica de persistencia)
+│   ├── Context/                             # Contextos y clases relacionadas con EF Core e Identity
+│   │   ├── ApplicationDbContext.cs          # Hereda de IdentityDbContext<ApplicationUser>; define DbSet<> y configuración Fluent API.
+│   │   └── ApplicationUser.cs               # Clase personalizada de usuario (extiende IdentityUser) — opcional.
 │   │
-│   ├── Context/                           -- Contextos de base de datos y configuración de Identity
-│   │   ├── ApplicationDbContext.cs        -- Contexto principal de Entity Framework Core
-│   │   └── ApplicationUser.cs             -- Clase personalizada para Identity (extiende IdentityUser)
+│   ├── Models/                              # Entidades del dominio (tablas del modelo relacional)
+│   │   ├── Vehiculo.cs                      # Entidad Vehículo (marca, modelo, año, tipo, categoría, relaciones).
+│   │   ├── TipoVehiculo.cs                  # Tipos de vehículo (SUV, Sedan, etc.) — relación con Vehiculo.
+│   │   ├── Categoria.cs                     # Categorías comerciales — relación con Vehiculo.
+│   │   ├── Cliente.cs                       # Entidad Cliente (datos personales, contacto, historial).
+│   │   └── Usuario.cs                       # Entidad para usuarios internos (Id, Nombre, Email, Teléfono, Rol, EsActivo).
 │   │
-│   ├── Models/                            -- Entidades del dominio (tablas del sistema)
-│   │   ├── Categoria.cs                   -- Define las categorías de vehículos
-│   │   ├── Cliente.cs                     -- Representa los datos de los clientes
-│   │   ├── TipoVehiculo.cs                -- Define los tipos de vehículos (SUV, Sedan, etc.)
-│   │   ├── Usuario.cs                     -- Representa a los empleados/usuarios internos
-│   │   └── Vehiculo.cs                    -- Entidad principal que gestiona los vehículos
-│   │
-│   └── Services/                          -- Servicios o lógica de negocio
-│       ├── IVehiculoService.cs            -- Interfaz para servicio de vehículos
-│       ├── IClienteService.cs             -- Interfaz para servicio de clientes
-│       ├── IUsuarioService.cs             -- Interfaz para servicio de usuarios
-│       ├── VehiculoService.cs             -- Servicio para manejar operaciones de vehículos
-│       ├── ClienteService.cs              -- Servicio para manejar operaciones de clientes
-│       └── UsuarioService.cs              -- Servicio para manejar operaciones de usuarios
+│   └── Services/                            # Servicios que encapsulan la lógica de negocio y persistencia
+│       ├── IVehiculoService.cs              # Interfaz CRUD y consultas para Vehículo.
+│       ├── IClienteService.cs               # Interfaz CRUD para Cliente.
+│       ├── IUsuarioService.cs               # Interfaz CRUD para Usuario.
+│       ├── VehiculoService.cs               # Implementación de IVehiculoService.
+│       ├── ClienteService.cs                # Implementación de IClienteService.
+│       └── UsuarioService.cs                # Implementación de IUsuarioService.
 │
-├── Web/                                   -- Capa de interfaz de usuario (Blazor)
-│   ├── Components/                        -- Componentes reutilizables
-│   │   ├── _Imports.razor                 -- Importaciones globales de Razor
-│   │   ├── App.razor                      -- Componente raíz de la aplicación
-│   │   ├── Routes.razor                   -- Define las rutas de navegación
-│   │   │
-│   │   ├── Pages/                         -- Páginas principales del sistema
-│   │   │   └── Auth.razor                 -- Página de autenticación/login
-│   │   │
-│   │   ├── Account/                       -- Sección de cuentas (login, registro, perfil)
-│   │   │
-│   │   └── Layout/                        -- Plantillas de diseño (navbar, sidebar, etc.)
-│
-├── Program.cs                             -- Punto de entrada de la aplicación (configuración principal)
-├── appsettings.json                       -- Archivo de configuración (cadena de conexión, entorno, etc.)
-├── Comentarios.md                         -- Notas o documentación adicional del proyecto
-└── README.md                              -- Documentación principal del proyecto
+└── Web/                                     # Capa de presentación (interfaz Blazor Server)
+    └── Components/                          # Componentes organizados por responsabilidad
+        ├── _Imports.razor                   # Usings/imports globales para todos los componentes.
+        ├── App.razor                        # Componente raíz de la aplicación Blazor.
+        ├── Routes.razor                     # Definición de rutas (si existe).
+        │
+        ├── Layout/                          # Layouts y componentes de estructura visual
+        │   └── MainLayout.razor             # Layout principal (navbar, sidebar, footer, estructura de página).
+        │
+        └── Account/                         # Componentes y páginas relacionadas con cuentas/Identity
+            ├── Shared/
+            │   └── AccountLayout.razor      # Layout específico para las páginas de autenticación (maneja HttpContext).
+            │
+            ├── IdentityComponentsEndpointRouteBuilderExtensions.cs
+            │                                # Extensiones para registrar endpoints de páginas de Identity como componentes Blazor.
+            │
+            └── Pages/
+                └── _Imports.razor           # Imports específicos para los componentes/páginas de cuenta.
+
 
 
 
@@ -128,4 +133,4 @@ Definición de interfaces y clases para los repositorios y servicios, incluyendo
 
 ## Conclusión
 
-Esta documentación proporciona una visión general de la arquitectura y estructura del proyecto **Rent Car**, sirviendo como guía para el desarrollo, integración y mantenimiento del sistema.
+Esta documentación proporciona una visión general de la arquitectura y estructura del proyecto **Rent Car**, sirviendo como guía para el desa
